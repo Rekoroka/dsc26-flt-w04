@@ -1,17 +1,12 @@
+import 'package:dsc26_flt_w04/domain/stop.dart';
+import 'package:dsc26_flt_w04/ui/stops/layout/compact_stops_layout.dart';
+import 'package:dsc26_flt_w04/ui/stops/layout/expanded_stops_layout.dart';
+import 'package:dsc26_flt_w04/ui/stops/sync_banner.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/stop.dart';
-import 'stop_tile.dart';
-import 'sync_banner.dart';
+const double _expandedBreakpoint = 600;
 
-/// Today's stops for one courier.
-///
-/// Keep this constructor. The screen works on a phone, but it has deliberate
-/// problems you must fix (README, Part B): no two-pane layout from 600 px,
-/// 32x32 unlabelled call buttons, rows that overflow at 200% text, a banner
-/// without a proper semantics label, and a status dot that stays on the left
-/// in Arabic.
-class TawseelStopsApp extends StatelessWidget {
+class TawseelStopsApp extends StatefulWidget {
   const TawseelStopsApp({
     super.key,
     required this.stops,
@@ -24,32 +19,53 @@ class TawseelStopsApp extends StatelessWidget {
   final TextDirection textDirection;
 
   @override
+  State<TawseelStopsApp> createState() => _TawseelStopsAppState();
+}
+
+class _TawseelStopsAppState extends State<TawseelStopsApp> {
+  Object? _selectedId;
+
+  Stop? get _selectedStop {
+    if (widget.stops.isEmpty) return null;
+    for (final stop in widget.stops) {
+      if (stop.id == _selectedId) return stop;
+    }
+    return widget.stops.first;
+  }
+
+  void _selectStop(Stop stop) => setState(() => _selectedId = stop.id);
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tawseel stops',
       debugShowCheckedModeBanner: false,
       builder: (context, child) =>
-          Directionality(textDirection: textDirection, child: child!),
+          Directionality(textDirection: widget.textDirection, child: child!),
       home: Scaffold(
         appBar: AppBar(title: const Text("Today's stops")),
         body: Column(
           children: [
             SyncBanner(
               key: const Key('sync-banner'),
-              pendingCount: pendingCount,
+              pendingCount: widget.pendingCount,
             ),
             Expanded(
-              child: KeyedSubtree(
-                key: const Key('layout-compact'),
-                child: ListView.builder(
-                  itemCount: stops.length,
-                  itemBuilder: (context, i) => StopTile(
-                    key: Key('stop-${stops[i].id}'),
-                    stop: stops[i],
-                    onTap: () {},
-                    onCall: () {},
-                  ),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth >= _expandedBreakpoint) {
+                    return ExpandedStopsLayout(
+                      key: const Key('layout-expanded'),
+                      stops: widget.stops,
+                      selectedStop: _selectedStop,
+                      onStopTap: _selectStop,
+                    );
+                  }
+                  return CompactStopsLayout(
+                    key: const Key('layout-compact'),
+                    stops: widget.stops,
+                    onStopTap: _selectStop,
+                  );
+                },
               ),
             ),
           ],
