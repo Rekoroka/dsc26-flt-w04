@@ -38,6 +38,7 @@ class StopTile extends StatelessWidget {
       subtitle: Text(stop.address),
 
       trailing: IconButton(
+        constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
         key: Key('call-${stop.id}'),
         icon: const Icon(Icons.call),
         tooltip: 'Call ${stop.customerName}',

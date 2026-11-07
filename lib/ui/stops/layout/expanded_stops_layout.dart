@@ -23,12 +23,7 @@ class ExpandedStopsLayout extends StatelessWidget {
           child: StopList(stops: stops, onTap: onStopTap),
         ),
         const VerticalDivider(width: 1),
-        Expanded(
-          child: StopDetails(
-            key: const Key('stop-detail'),
-            selectedStop: selectedStop,
-          ),
-        ),
+        Expanded(child: StopDetails(selectedStop: selectedStop)),
       ],
     );
   }
